@@ -22,7 +22,7 @@
     "lib"
   ],
   "main": "./lib/main/index.js",
-  "module": "./src/module/index.js",
+  "module": "./lib/module/index.js",
   "browserslist": "> 1%",
   "scripts": {
     "clean": "rimraf lib/*",
