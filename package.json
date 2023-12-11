@@ -34,7 +34,7 @@
   "repository": "github:KiweeEu/apollo-link-watched-mutation",
   "scripts": {
     "prepublishOnly": "npm test && npm run clean && npm run build",
-    "clean": "rimraf lib/*",
+    "clean": "rimraf lib",
     "build:main": "babel src -d lib/main --config-file ./babel.main.json",
     "build:module": "babel src -d lib/module --config-file ./babel.module.json",
     "build": "npm run build:main && npm run build:module",
