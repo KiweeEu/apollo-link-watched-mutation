@@ -27,10 +27,12 @@
     }
   ],
   "files": [
-    "lib"
+    "lib",
+    "*.d.ts"
   ],
   "main": "./lib/main/index.js",
   "module": "./lib/module/index.js",
+  "types": "index.d.ts",
   "repository": "github:KiweeEu/apollo-link-watched-mutation",
   "scripts": {
     "prepublishOnly": "npm test && npm run clean && npm run build",
