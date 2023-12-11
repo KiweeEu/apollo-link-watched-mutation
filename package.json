@@ -1,7 +1,7 @@
 {
   "name": "@kiwee/apollo-link-watched-mutation",
   "version": "1.0.0",
-  "description": "An interface for providing default updates for mutation - query pairings",
+  "description": "An interface for providing default updates for mutation/subscription - query pairings",
   "keywords": [
     "apollo",
     "link",
@@ -20,6 +20,10 @@
       "name": "Serhii Korzh",
       "email": "serhii.korzh@kiwee.eu",
       "url": "https://kiwee.eu"
+    },
+    {
+      "name": "Daniel Rose",
+      "email": "danrose@gmx.de"
     }
   ],
   "files": [

@@ -1,6 +1,6 @@
 # apollo-link-watched-mutation ![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)
 
-A Link interface for providing default cache updates based on { mutation : query } relationships
+A Link interface for providing default cache updates based on { mutation/subscription : query } relationships
 
 This is a maintained fork of [afafafafafaf/apollo-link-watched-mutation](https://github.com/afafafafafaf/apollo-link-watched-mutation).
 
@@ -30,7 +30,7 @@ Now, Apollo also offers some ways around this, notably in the form of an [update
 
 However, this update variable doesn't scale very well (in terms of developer maintainability) in a couple scenarios.
 1. As the number of queries to update grows, you need knowledge of all of their cache keys in order to keep them updated. In the case of variable lists which aren't predefined, this means you also need to store all of their variables in order to read and update their cached values.
-2. As the number of places where you call the same or similar mutations grows, you need to replicate or find a good general pattern to recreate all of the cacheKey storing and updating logic described above.
+2. As the number of places where you call the same or similar mutations/subscriptions grows, you need to replicate or find a good general pattern to recreate all of the cacheKey storing and updating logic described above.
 3. You need to, to some extent, embed this logic inside your components, conflating your view with your caching layer even though you could declare the caching behavior you want on start-up.
 ```javascript
 // This update becomes a lot more complex if...
@@ -57,12 +57,15 @@ new WatchedMutationLink(
     SaveTodo: {
       TodoList: ({ mutation, query }) => { /* */ }
     }
+    SavedTodos: {
+      TodoList: ({ subscription, query }) => { /* */ }
+    }
   }
 )
 ```
-By adding this WatchedMutationLink to our networking stack, the exported apollo-client would invoke the callback provided for each cached query named *TodoList* whenever a successful mutation named *SaveTodo* is received. If the WatchedMutationLink receives an updated form of the cached data from the callback, it will write that updated data to the cache.
+By adding this WatchedMutationLink to our networking stack, the exported apollo-client would invoke the callback provided for each cached query named *TodoList* whenever a successful mutation named *SaveTodo* is received, as well as the callback for each subscription named *SavedTodos*. If the WatchedMutationLink receives an updated form of the cached data from the callback, it will write that updated data to the cache.
 
-By monitoring networking traffic, the Link figures out when you may want to update your cache based off a mutation and query and you determine how it should update all in one place.
+By monitoring networking traffic, the Link figures out when you may want to update your cache based off a mutation/subscription and query and you determine how it should update all in one place.
 
 ## Example usage
 

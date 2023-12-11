@@ -4,19 +4,19 @@ const validateCache = cache => {
   }
 };
 
-const validateMutationQueryResolverMap = map => {
+const validateMutationOrSubscriptionToQueryToResolverMap = map => {
   if (!map || typeof map !== 'object') {
-    throw new TypeError('WatchedMutationLink requires a valid mutation -> query -> updateFn map');
+    throw new TypeError('WatchedMutationLink requires a valid mutation/subscription -> query -> updateFn map');
   }
-  const mutationKeys = Object.keys(map);
-  const invalidMutationKeys = mutationKeys.filter(name => typeof name !== 'string');
-  if (invalidMutationKeys.length) {
-    throw new TypeError('WatchedMutationLink requires valid MutationNames as keys in the mutation map provided');
+  const mutationOrSubscriptionKeys = Object.keys(map);
+  const invalidMutationOrSubscriptionKeys = mutationOrSubscriptionKeys.filter(name => typeof name !== 'string');
+  if (invalidMutationOrSubscriptionKeys.length) {
+    throw new TypeError('WatchedMutationLink requires valid MutationNames/SubscriptionNames as keys in the mutation/subscription map provided');
   }
-  const queryKeys = mutationKeys.reduce((keyList, key) => {
+  const queryKeys = mutationOrSubscriptionKeys.reduce((keyList, key) => {
     const queryMap = map[key];
     if (typeof queryMap !== 'object') {
-      throw new TypeError('WatchedMutationLink requires a valid mutation -> query -> updateFn map');
+      throw new TypeError('WatchedMutationLink requires a valid mutation/subscription -> query -> updateFn map');
     }
     return [...keyList, ...(Object.keys(queryMap))];
   }, []);
@@ -24,7 +24,7 @@ const validateMutationQueryResolverMap = map => {
   if (invalidQueryKeys.length) {
     throw new TypeError('WatchedMutationLink requires valid QueryNames as keys in the query map provided');
   }
-  const updateFns = mutationKeys.reduce((updateFnList, key) => {
+  const updateFns = mutationOrSubscriptionKeys.reduce((updateFnList, key) => {
     return [...updateFnList, ...(Object.values(map[key]))];
   }, []);
   const invalidUpdateFns = updateFns.filter(fn => typeof fn !== 'function');
@@ -35,5 +35,5 @@ const validateMutationQueryResolverMap = map => {
 
 export const assertPreconditions = (cache, map) => {
   validateCache(cache);
-  validateMutationQueryResolverMap(map);
+  validateMutationOrSubscriptionToQueryToResolverMap(map);
 }
