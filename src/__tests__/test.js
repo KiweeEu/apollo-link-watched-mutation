@@ -11,8 +11,11 @@ import {
   sampleErrorQueryResponse,
   sampleSuccessfulMutationResponse,
   sampleErrorMutationResponse,
+  sampleSuccessfulSubscriptionResponse,
+  sampleErrorSubscriptionResponse,
   createCache,
   mutation,
+  subscription,
   query
 } from './private';
 const cache = createCache();
@@ -231,6 +234,153 @@ describe('WatchedMutationLink', () => {
     ]);
 
     execute(mutationLink, mutation).subscribe(() => {
+      expect(called).toBe(true);
+      done();
+    });
+  });
+
+  it('should ignore unsuccessful subscriptions', done => {
+    let called = false;
+    const watchedMutationLink = new WatchedMutationLink(cache, {
+      SavedTodos: { TodoList: () => { called = true; } }
+    });
+    const mockQueryLink = new ApolloLink(() => Observable.of(sampleSuccessfulQueryResponse));
+    const mockSubscriptionLink = new ApolloLink(() => Observable.of(sampleErrorSubscriptionResponse));
+    const queryLink = ApolloLink.from([
+      watchedMutationLink,
+      mockQueryLink
+    ]);
+
+    expect(watchedMutationLink.queryManager.hasQueryToUpdate('TodoList')).toBe(false);
+
+    execute(queryLink, query).subscribe(() => {
+      expect(watchedMutationLink.queryManager.hasQueryToUpdate('TodoList')).toBe(true);
+      const todoListQueriesToUpdate = watchedMutationLink.queryManager.getQueryKeysToUpdate('TodoList');
+      expect(todoListQueriesToUpdate.length).toBe(1);
+      expect(todoListQueriesToUpdate[0].variables).toMatchObject({ status: 'DONE' });
+      expect(called).toBe(false);
+    });
+
+    // mock what should be stored in apollo's cache after a successful query
+    watchedMutationLink.cache.read = cacheKey => {
+      if (JSON.stringify(cacheKey) === JSON.stringify(query)) {
+        return sampleErrorQueryResponse;
+      }
+    }
+    const link = ApolloLink.from([
+      watchedMutationLink,
+      mockSubscriptionLink
+    ]);
+    execute(link, subscription).subscribe(() => {
+      expect(called).toBe(false);
+      done();
+    });
+  });
+
+  it('should ignore successful but unwatched subscriptions', done => {
+    let called = false;
+    const watchedMutationLink = new WatchedMutationLink(cache, {
+      SavedTodos: { TodoList: () => { called = true; } }
+    });
+    const mockQueryLink = new ApolloLink(() => Observable.of(sampleSuccessfulQueryResponse));
+    const mockSubscriptionLink = new ApolloLink(() => Observable.of({
+      data: { savedUsers: { id: 'foo', name: 'Joh' } }
+    }));
+    const queryLink = ApolloLink.from([
+      watchedMutationLink,
+      mockQueryLink
+    ]);
+
+    expect(watchedMutationLink.queryManager.hasQueryToUpdate('TodoList')).toBe(false);
+
+    execute(queryLink, query).subscribe(() => {
+      expect(watchedMutationLink.queryManager.hasQueryToUpdate('TodoList')).toBe(true);
+      const todoListQueriesToUpdate = watchedMutationLink.queryManager.getQueryKeysToUpdate('TodoList');
+      expect(todoListQueriesToUpdate.length).toBe(1);
+      expect(todoListQueriesToUpdate[0].variables).toMatchObject({ status: 'DONE' });
+      expect(called).toBe(false);
+    });
+
+    // mock what should be stored in apollo's cache after a successful query
+    watchedMutationLink.cache.read = cacheKey => {
+      if (JSON.stringify(cacheKey) === JSON.stringify(query)) {
+        return sampleErrorQueryResponse;
+      }
+    }
+
+    
+    const link = ApolloLink.from([
+      watchedMutationLink,
+      mockSubscriptionLink
+    ]);
+    const usersSubscription = gql`
+        subscription SavedUsers {
+          id
+          name
+        }
+    `;
+
+    execute(link, { query: usersSubscription, variables: usersSubscription }).subscribe(() => {
+      expect(called).toBe(false);
+      done();
+    });
+  });
+
+  it('should NOT invoke the provided callback if no cached query exists for a watched subscription', done => {
+    let called = false;
+    const watchedMutationLink = new WatchedMutationLink(cache, {
+      SavedTodos: { TodoList: () => { called = true; } }
+    });
+    const mockLink = new ApolloLink(() => Observable.of(sampleSuccessfulSubscriptionResponse));
+    const link = ApolloLink.from([
+      watchedMutationLink,
+      mockLink
+    ]);
+
+    execute(link, subscription).subscribe(() => {
+      expect(called).toBe(false);
+      done();
+    });
+  });
+
+  it('should invoke the provided callback if a cached query exists for a watched subscription', done => {
+    let called = false;
+    const watchedMutationLink = new WatchedMutationLink(cache, {
+      SavedTodos: {
+        TodoList: () => {
+          called = true;
+        }
+      }
+    });
+    const mockQueryLink = new ApolloLink(() => Observable.of(sampleSuccessfulQueryResponse));
+    const mockSubscriptionLink = new ApolloLink(() => Observable.of(sampleSuccessfulSubscriptionResponse));
+    const queryLink = ApolloLink.from([
+      watchedMutationLink,
+      mockQueryLink
+    ]);
+
+    expect(watchedMutationLink.queryManager.hasQueryToUpdate('TodoList')).toBe(false);
+
+    execute(queryLink, query).subscribe(() => {
+      expect(watchedMutationLink.queryManager.hasQueryToUpdate('TodoList')).toBe(true);
+      const todoListQueriesToUpdate = watchedMutationLink.queryManager.getQueryKeysToUpdate('TodoList');
+      expect(todoListQueriesToUpdate.length).toBe(1);
+      expect(todoListQueriesToUpdate[0].variables).toMatchObject({ status: 'DONE' });
+      expect(called).toBe(false);
+    });
+
+    // mock what should be stored in apollo's cache after a successful query
+    watchedMutationLink.cache.read = cacheKey => {
+      if (JSON.stringify(cacheKey) === JSON.stringify(query)) {
+        return sampleErrorQueryResponse;
+      }
+    }
+    const link = ApolloLink.from([
+      watchedMutationLink,
+      mockSubscriptionLink
+    ]);
+
+    execute(link, subscription).subscribe(() => {
       expect(called).toBe(true);
       done();
     });

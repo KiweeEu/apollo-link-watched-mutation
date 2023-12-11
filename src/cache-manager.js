@@ -36,7 +36,7 @@ export const createCacheManager = (cache, debug, readOnly) => {
         cache.writeQuery({ ...query, data });
         if (debug) {
           window.console.log({
-            message: 'Success --- Updated the cache upon a mutation',
+            message: 'Success --- Updated the cache upon a mutation/subscription',
             cacheKey: query,
             data
           });
