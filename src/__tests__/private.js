@@ -55,6 +55,31 @@ export const sampleErrorMutationResponse = {
   errors: [{ message: 'Oops forgot to implement' }]
 };
 
+export const sampleSubscription = gql`
+    subscription SavedTodos {
+        savedTodos {
+            id
+            name
+            status
+        }
+    }
+`;
+
+export const sampleSuccessfulSubscriptionResponse = {
+  data: {
+    SavedTodos: {
+      id: '1',
+      name: 'Get groceries',
+      status: 'DONE'
+    }
+  }
+};
+
+export const sampleErrorSubscriptionResponse = {
+  data: null,
+  errors: [{ message: 'Oops forgot to implement' }]
+};
+
 
 export const query = {
   query: sampleQuery,
@@ -63,6 +88,9 @@ export const query = {
 export const mutation = {
   query: sampleMutation,
   variables: { id: 'todo_1', status: 'IN_PROGRESS' }
+};
+export const subscription = {
+  query: sampleSubscription
 };
 export const createCache = () => {
   const data = {};
