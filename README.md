@@ -67,6 +67,32 @@ By adding this WatchedMutationLink to our networking stack, the exported apollo-
 
 By monitoring networking traffic, the Link figures out when you may want to update your cache based off a mutation/subscription and query and you determine how it should update all in one place.
 
+## Callback arguments
+
+For a mutation, the callback is invoked with the following arguments:
+
+- mutation: object, consisting of:
+  - name: string, name of the mutation
+  - variables: object, variables of the mutation
+  - result: object, result data of the mutation
+- query: object, consisting of:
+  - name: string, name of the query
+  - variables: object, variables of the query
+  - result: object, cached data of the query
+
+Similarly, for a subscription, the callback is invoked with the following arguments:
+
+- subscription: object, consisting of:
+  - name: string, name of the subscription
+  - variables: object, variables of the subscription
+  - result: object, result data of the subscription
+- query: object, consisting of:
+  - name: string, name of the query
+  - variables: object, variables of the query
+  - result: object, cached data of the query
+
+If the callback returns data (not null or undefined), the updated data is written to the cache using writeQuery.
+
 ## Example usage
 
 NOTE: the examples haven't been updated to the newest version of the package.
